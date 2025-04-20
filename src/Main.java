@@ -53,6 +53,7 @@ public class Main {
         System.out.println("======================================");
         
         while (running) {
+            clearConsole();
             displayMainMenu();
             int choice = getUserChoice();
             
@@ -105,6 +106,28 @@ public class Main {
         
         scanner.close();
     }
+
+    private static void clearConsole() {
+        try {
+            String operatingSystem = System.getProperty("os.name");
+
+            if (operatingSystem.contains("Windows")) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+            } else {
+                // For Unix/Linux/Mac
+                new ProcessBuilder("clear").inheritIO().start().waitFor();
+            }
+        } catch (Exception e) {
+            // Fallback to printing multiple newlines
+            for (int i = 0; i < 50; i++) {
+                System.out.println();
+            }
+        }
+
+        System.out.println("======================================");
+        System.out.println("🎓 Welcome to WeStudy Application 🎓");
+        System.out.println("======================================");
+    }
     
     private static void setupInitialData() {
         // Add some schools
@@ -119,7 +142,7 @@ public class Main {
         StudyProgram geneeskunde = new StudyProgram(202, "Geneeskunde", universityLeiden);
         StudyProgram psychologie = new StudyProgram(301, "Psychologie", universityUtrecht);
         
-        // Add programs to schools (assuming School has a method to add programs)
+        // Add programs to schools
         haagseHogeschool.addProgram(informatica);
         haagseHogeschool.addProgram(bedrijfskunde);
         universityLeiden.addProgram(rechten);
