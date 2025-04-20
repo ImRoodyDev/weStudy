@@ -3,10 +3,12 @@ import classes.Authentication;
 import classes.School;
 import classes.SchoolFinder;
 import classes.Student;
+import classes.StudyProgram;
 import interfaces.AuthenticationListener;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Main {
     private static Authentication auth;
@@ -78,6 +80,18 @@ public class Main {
                 case 5:
                     searchSchools();
                     break;
+                case 6:
+                    if (currentUser != null && currentUser instanceof Student) {
+                        Student student = (Student) currentUser;
+                        if (student.getSelectedSchool() != null) {
+                            selectStudyProgram(student, student.getSelectedSchool());
+                        } else {
+                            System.out.println("❌ You need to select a school first!");
+                        }
+                    } else {
+                        System.out.println("❌ You need to login as a student first!");
+                    }
+                    break;
                 case 0:
                     System.out.println("👋 Thank you for using WeStudy. Goodbye!");
                     running = false;
@@ -98,6 +112,20 @@ public class Main {
         School universityLeiden = new School(2, "Universiteit Leiden");
         School universityUtrecht = new School(3, "Universiteit Utrecht");
         
+        // Add study programs to schools
+        StudyProgram informatica = new StudyProgram(101, "HBO-ICT", haagseHogeschool);
+        StudyProgram bedrijfskunde = new StudyProgram(102, "Bedrijfskunde", haagseHogeschool);
+        StudyProgram rechten = new StudyProgram(201, "Rechten", universityLeiden);
+        StudyProgram geneeskunde = new StudyProgram(202, "Geneeskunde", universityLeiden);
+        StudyProgram psychologie = new StudyProgram(301, "Psychologie", universityUtrecht);
+        
+        // Add programs to schools (assuming School has a method to add programs)
+        haagseHogeschool.addProgram(informatica);
+        haagseHogeschool.addProgram(bedrijfskunde);
+        universityLeiden.addProgram(rechten);
+        universityLeiden.addProgram(geneeskunde);
+        universityUtrecht.addProgram(psychologie);
+        
         schoolFinder.addSchool(haagseHogeschool);
         schoolFinder.addSchool(universityLeiden);
         schoolFinder.addSchool(universityUtrecht);
@@ -116,6 +144,7 @@ public class Main {
         System.out.println("3. View profile");
         System.out.println("4. Logout");
         System.out.println("5. Search schools");
+        System.out.println("6. Select study program");
         System.out.println("0. Exit");
         System.out.println("--------------------------------------");
         System.out.print("Enter your choice: ");
@@ -224,10 +253,44 @@ public class Main {
                     
                     if (student.selectSchool(selectedSchool)) {
                         System.out.println("✅ School '" + selectedSchool.getName() + "' has been selected.");
+                        
+                        // After selecting a school, offer to select a study program
+                        selectStudyProgram(student, selectedSchool);
                     } else {
                         System.out.println("❌ Failed to select school.");
                     }
                 }
+            }
+        }
+    }
+    
+    private static void selectStudyProgram(Student student, School school) {
+        List<StudyProgram> programs = school.getPrograms();
+        
+        if (programs == null || programs.isEmpty()) {
+            System.out.println("No study programs available for this school.");
+            return;
+        }
+        
+        System.out.println("\n📚 SELECT STUDY PROGRAM");
+        System.out.println("--------------------------------------");
+        System.out.println("Available programs at " + school.getName() + ":");
+        
+        for (int i = 0; i < programs.size(); i++) {
+            StudyProgram program = programs.get(i);
+            System.out.println((i+1) + ". " + program.getName() + " (ID: " + program.getId() + ")");
+        }
+        
+        System.out.print("\nSelect a program by number (or 0 to cancel): ");
+        int selection = getUserChoice();
+        
+        if (selection > 0 && selection <= programs.size()) {
+            StudyProgram selectedProgram = programs.get(selection - 1);
+            
+            if (student.selectStudyProgram(selectedProgram)) {
+                System.out.println("✅ Program '" + selectedProgram.getName() + "' has been selected.");
+            } else {
+                System.out.println("❌ Failed to select program.");
             }
         }
     }
